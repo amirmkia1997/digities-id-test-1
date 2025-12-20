@@ -1,45 +1,38 @@
 <!DOCTYPE html>
-<html lang="fa">
-<head>
-  <meta charset="UTF-8" />
-  <title>Test Page</title>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <script>
+      let parentHostname = null;
 
-  <script type="text/javascript">
-    (function (d, g, t, i, e, s) {
-      var o = d["digities"] = d["digities"] || {};
-      d[e] = d[e] || function () {
-        (o.q = o.q || []).push(arguments);
-      };
-      var cdn_url = "https=/cdn.digities.tech/zMzGMP/stage_1-WEBSITE-62890700";
-
-      s = g.createElement(t);
-      s.async = true;
-      s.src = cdn_url;
-
-      s.onload = function () {
-        if (window.Publisher && window.Publisher.getInstance) {
-          window.Publisher.getInstance().then(function (instance) {
-            o.init = function () {
-              return instance;
-            };
-
-            if (o.q) {
-              o.q.forEach(function (args) {
-                o.init.apply(o, args);
-              });
-              o.q = [];
+      async function sendDwidRequest() {
+        try {
+          const response = await fetch('https://api-dwid.digities.tech/api/v1/dwid?source=IFRAME', {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+              'Dwid-Origin': parentHostname || 'unknown',
             }
           });
+          if (response.ok) {
+            const data = await response.json();
+            if (data && data.dwid) {
+              window.parent.postMessage({ type: 'DWID_RECEIVED', dwid: data.dwid }, '*');
+            }
+          }
+        } catch (error) {
         }
-      };
-
-      e = g.getElementsByTagName(t)[0];
-      e.parentNode.insertBefore(s, e);
-    })(window, document, "script", "digities");
-  </script>
-</head>
-<body>
-  <h1>PAGE : 1</h1>
-  
-</body>
+      }
+      window.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'SET_PARENT_HOST') {
+          parentHostname = event.data.hostname;
+        } else if (event.data && event.data.type === 'INIT_DWID_REQUEST') {
+          sendDwidRequest();
+        }
+      });
+    </script>
+  </body>
 </html>
