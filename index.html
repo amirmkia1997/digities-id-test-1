@@ -26,13 +26,7 @@
         } catch (error) {
         }
       }
-      window.addEventListener('message', function(event) {
-        if (event.data && event.data.type === 'SET_PARENT_HOST') {
-          parentHostname = event.data.hostname;
-        } else if (event.data && event.data.type === 'INIT_DWID_REQUEST') {
-          sendDwidRequest();
-        }
-      });
+      sendDwidRequest()
     </script>
   </body>
 </html>
